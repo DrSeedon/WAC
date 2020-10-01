@@ -3,58 +3,56 @@ using System;
 using TMPro;
 using UnityEngine;
 
-namespace DapperDino.Mirror.Tutorials.Chat
+public class ChatBehaviour : NetworkBehaviour
 {
-    public class ChatBehaviour : NetworkBehaviour
+    [SerializeField] private GameObject chatUI = null;
+    [SerializeField] private TMP_Text chatText = null;
+    [SerializeField] private TMP_InputField inputField = null;
+
+    private static event Action<string> OnMessage;
+
+    public override void OnStartAuthority()
     {
-        [SerializeField] private GameObject chatUI = null;
-        [SerializeField] private TMP_Text chatText = null;
-        [SerializeField] private TMP_InputField inputField = null;
+        chatUI.SetActive(true);
 
-        private static event Action<string> OnMessage;
+        OnMessage += HandleNewMessage;
+    }
 
-        public override void OnStartAuthority()
-        {
-            chatUI.SetActive(true);
+    [ClientCallback]
+    private void OnDestroy()
+    {
+        if (!hasAuthority) { return; }
 
-            OnMessage += HandleNewMessage;
-        }
+        OnMessage -= HandleNewMessage;
+    }
 
-        [ClientCallback]
-        private void OnDestroy()
-        {
-            if (!hasAuthority) { return; }
+    private void HandleNewMessage(string message)
+    {
+        chatText.text += message;
+    }
 
-            OnMessage -= HandleNewMessage;
-        }
+    [Client]
+    public void Send(string message)
+    {
+        if (!Input.GetKeyDown(KeyCode.Return)) { return; }
 
-        private void HandleNewMessage(string message)
-        {
-            chatText.text += message;
-        }
+        if (string.IsNullOrWhiteSpace(message)) { return; }
 
-        [Client]
-        public void Send(string message)
-        {
-            if (!Input.GetKeyDown(KeyCode.Return)) { return; }
+        CmdSendMessage(message);
 
-            if (string.IsNullOrWhiteSpace(message)) { return; }
+        inputField.text = string.Empty;
+    }
 
-            CmdSendMessage(message);
+    [Command]
+    private void CmdSendMessage(string message)
+    {
+        RpcHandleMessage($"[{connectionToClient.connectionId}]: {message}");
+    }
 
-            inputField.text = string.Empty;
-        }
-
-        [Command]
-        private void CmdSendMessage(string message)
-        {
-            RpcHandleMessage($"[{connectionToClient.connectionId}]: {message}");
-        }
-
-        [ClientRpc]
-        private void RpcHandleMessage(string message)
-        {
-            OnMessage?.Invoke($"\n{message}");
-        }
+    [ClientRpc]
+    private void RpcHandleMessage(string message)
+    {
+        OnMessage?.Invoke($"\n{message}");
     }
 }
+
