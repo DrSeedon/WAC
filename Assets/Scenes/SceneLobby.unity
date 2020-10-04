@@ -433,9 +433,7 @@ MonoBehaviour:
   playerPrefab: {fileID: 66705486231865545, guid: 70e84ce1f688e5347a4868b5bad245b6, type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 0
-  spawnPrefabs:
-  - {fileID: 536342107360672105, guid: a3c8618ffaf350943a133782b8f8a875, type: 3}
-  - {fileID: 66705486231865545, guid: 70e84ce1f688e5347a4868b5bad245b6, type: 3}
+  spawnPrefabs: []
   minPlayers: 2
   menuScene: Assets/ExamplesTutor/Tutorials/Scene_Lobby.unity
   roomPlayerPrefab: {fileID: 5494571419773178487, guid: a3c8618ffaf350943a133782b8f8a875, type: 3}
